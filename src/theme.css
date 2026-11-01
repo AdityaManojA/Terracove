@@ -263,101 +263,6 @@ details.release>summary:after{content:'+';font-size:20px;font-weight:600;color:v
 .note-card .note-title,.card .note-title{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
 @media(max-width:700px){.section-tabs,.tabs-pill{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;border-radius:999px}.section-tabs::-webkit-scrollbar,.tabs-pill::-webkit-scrollbar{display:none}.section-tabs button,.tabs-pill a,.tabs-pill button{white-space:nowrap;flex-shrink:0}}
 
-/* ---------- 1.03 calendar ---------- */
-.calendar-b{display:flex;flex-direction:column;gap:14px}
-.calendar-b .page-head{margin-bottom:0}
-.cal-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cal-step{display:flex;gap:2px}
-.cal-step .icon-x,.cal-zoom>.icon-x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px}
-.cal-step .icon-x:hover,.cal-zoom>.icon-x:hover{background:var(--card)}
-.cal-label{margin:0 auto 0 4px;font-size:26px;min-width:0}
-.cal-zoom{display:flex;align-items:center;gap:4px}
-.cal-zoom>.icon-x:disabled{opacity:.3;cursor:default}
-.cal-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
-.cal-filters .select-control{width:auto;min-width:180px;margin:0}
-.cal-check{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin:0}
-.calendar-move-status{margin:0;min-height:0;font-size:13px;color:var(--mu)}
-.calendar-move-status:empty{display:none}
-.cal-chip{display:flex;align-items:center;gap:6px;width:100%;border:0;border-radius:8px;padding:3px 7px;font:500 12px var(--font-body);text-align:left;cursor:pointer;color:#141414;background:color-mix(in srgb,var(--tone) 55%,var(--sf));box-shadow:inset 3px 0 0 var(--tone);min-width:0}
-.cal-chip.shared{background:transparent;box-shadow:none;border:1px dashed var(--mu);color:var(--tx)}
-.cal-chip .cal-time{font-weight:600;flex-shrink:0;font-size:11px}
-.cal-chip .cal-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-:root[data-theme=dark] .cal-chip:not(.shared){color:#141414}
-.work-timeline{display:flex;flex-direction:column;gap:12px;padding:20px}
-.wt-grid{display:flex;flex-direction:column;gap:8px}
-.wt-ticks,.wt-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start}
-.wt-ticks .wt-track{height:16px;background:none}
-.wt-ticks .wt-track span{position:absolute;font-size:11px;color:var(--mu);transform:translateX(2px);white-space:nowrap}
-.wt-name{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;text-decoration:none;color:var(--tx);padding-top:5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wt-name i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.wt-track{position:relative;border-radius:10px;min-height:28px}
-.wt-row .wt-track{background:var(--sf)}
-.wt-bar{position:absolute;height:26px;border:0;border-radius:999px;padding:0 10px;display:flex;align-items:center;gap:8px;cursor:pointer;color:#141414;font:inherit;overflow:hidden;white-space:nowrap;margin-top:1px}
-.wt-bar b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
-.wt-bar small{font-size:11px;opacity:.75}
-.wt-bar.before{border-top-left-radius:4px;border-bottom-left-radius:4px}
-.wt-bar.after{border-top-right-radius:4px;border-bottom-right-radius:4px}
-.wt-now{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--tx);border-radius:1px;z-index:1;opacity:.6}
-.year-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.year-month{background:var(--card);border-radius:var(--radius);padding:16px}
-.year-title{border:0;background:none;font:500 18px var(--font-display);color:var(--tx);cursor:pointer;padding:0 0 8px}
-.year-month .mini-cal{font-size:12px;gap:2px}
-.year-month .mini-cal a,.year-month .mini-cal span{height:26px;border-radius:13px}
-.month-b{background:var(--sf);border-radius:var(--radius);overflow:clip;border:1px solid var(--ln)}
-.month-b-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));font-size:12px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.month-b-head span{padding:10px 10px 6px}
-.month-b-week{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:118px;border-top:1px solid var(--ln)}
-.month-b-cell{grid-row:1;border-left:1px solid var(--ln);padding:4px 4px 6px;min-width:0;display:flex;flex-direction:column}
-.month-b-cell:first-child{border-left:0}
-.month-b-cell.outside{background:color-mix(in srgb,var(--card) 45%,transparent)}
-.month-b-cell.outside .month-b-num{color:var(--mu)}
-.month-b-cell.drop-target{background:color-mix(in srgb,var(--hero) 18%,transparent)}
-.month-b-num{align-self:flex-start;border:0;background:none;font:600 13px var(--font-body);color:var(--tx);min-width:28px;height:28px;border-radius:14px;padding:0 6px;cursor:pointer}
-.month-b-num:hover{background:var(--card)}
-.month-b-num.today{background:var(--hero);color:#141414}
-.month-b-items{display:flex;flex-direction:column;gap:3px;min-width:0}
-.month-b-span{position:absolute;grid-row:1;align-self:start;height:21px;margin:0 3px;border:0;border-radius:6px;padding:0 8px;font:600 12px var(--font-body);color:#141414;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;z-index:1}
-.timegrid .month-b-span{position:relative;top:auto}
-.month-b-span.before{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:0}
-.month-b-span.after{border-top-right-radius:0;border-bottom-right-radius:0;margin-right:0}
-.month-b-span.shared{border:1px dashed var(--mu);color:var(--tx)}
-.more-events{border:0;background:none;color:var(--mu);font:600 11px var(--font-body);text-align:left;padding:2px 6px;cursor:pointer;min-height:0;width:auto}
-.timegrid{padding:0;background:var(--sf);border:1px solid var(--ln)!important;overflow:clip}
-.tg-head,.tg-allday,.tg-body{display:grid}
-.tg-head{border-bottom:1px solid var(--ln)}
-.tg-day{border:0;background:none;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--tx);font:inherit}
-.tg-day small{font-size:11px;color:var(--mu);text-transform:uppercase;font-weight:600}
-.tg-day b{font:500 22px var(--font-display);width:38px;height:38px;border-radius:50%;display:grid;place-items:center}
-.tg-day.today b{background:var(--hero);color:#141414}
-.tg-allday{border-bottom:1px solid var(--ln);position:relative}
-.tg-label{font-size:11px;color:var(--mu);padding:8px 6px;grid-row:1;grid-column:1}
-.tg-allday-cell{border-left:1px solid var(--ln)}
-.tg-allday-cell.drop-target{background:color-mix(in srgb,var(--hero) 18%,transparent)}
-.tg-scroll{max-height:min(68vh,720px);overflow-y:auto;position:relative}
-.tg-body{position:relative}
-.tg-hours{position:relative}
-.tg-hours span{position:absolute;right:8px;transform:translateY(-50%);font-size:11px;color:var(--mu)}
-.tg-col{position:relative;border-left:1px solid var(--ln)}
-.tg-slot{position:absolute;left:0;right:0;border-top:1px solid color-mix(in srgb,var(--ln) 70%,transparent)}
-.tg-slot.drop-target{background:color-mix(in srgb,var(--hero) 22%,transparent)}
-.tg-event{position:absolute;border:0;border-radius:10px;padding:5px 8px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:1px;overflow:hidden;font:inherit;color:#141414;background:color-mix(in srgb,var(--tone) 65%,var(--sf));box-shadow:inset 3px 0 0 var(--tone);z-index:2}
-.tg-event b{font-size:12px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tg-event small{font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tg-event.short{flex-direction:row;align-items:center;gap:6px;padding:2px 8px}
-.tg-event.shared{background:var(--sf);box-shadow:none;border:1px dashed var(--mu);color:var(--tx)}
-.tg-now{position:absolute;left:-4px;right:0;height:2px;background:var(--hero-deep);z-index:3}
-.tg-now::before{content:"";position:absolute;left:-1px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--hero-deep)}
-.timegrid.single .tg-day{flex-direction:row;justify-content:flex-start;gap:10px;padding-left:12px}
-.day-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
-.day-plan{display:flex;flex-direction:column;gap:12px}
-.day-plan .card{padding:18px}
-.day-plan .list-row+.list-row{margin-top:8px}
-.cal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mu)}
-.cal-foot .source-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0}
-.cal-foot .source-status p{margin:0}
-@media(max-width:1100px){.year-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.day-layout{grid-template-columns:1fr}}
-@media(max-width:760px){.year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cal-label{width:100%;order:-1;margin:0;font-size:22px}.wt-ticks,.wt-row{grid-template-columns:90px minmax(0,1fr)}.month-b-week{min-height:84px}.month-b-items .cal-chip{padding:2px 4px;font-size:10px}.month-b-items .cal-chip .cal-time{display:none}.timegrid:not(.single){overflow-x:auto}.timegrid:not(.single)>div{min-width:640px}}
-@media(max-width:480px){.year-grid{grid-template-columns:1fr}.month-b-items .cal-chip .cal-title{display:none}.month-b-items .cal-chip{height:6px;padding:0;border-radius:3px}}
 
 /* ---------- 1.03 toolbar, project cards, sidebar user, charts, Levern colours ---------- */
 .header-actions{display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:var(--card)}
@@ -531,45 +436,6 @@ details.release>summary:after{content:'+';font-size:20px;font-weight:600;color:v
 .inline-add{display:flex;gap:8px;align-items:center;margin:-4px 0 8px}
 .inline-add input{flex:1;min-width:0;margin:0}
 .check-row{display:flex;align-items:center;gap:10px;margin:14px 0 6px;font-weight:600}
-/* ---------- 1.05 calendar: bars span their days; free / busy at a glance ---------- */
-.month-b-span{left:0;right:0}
-.month-b-top{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0}
-.load-tag{font-size:11px;font-weight:600;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
-.month-b-cell.load-free:not(.outside){background:color-mix(in srgb,var(--sage) 16%,var(--sf))}
-.month-b-cell.load-free .load-tag{color:#4E6B3A}
-.month-b-cell.load-light:not(.outside){background:var(--sf)}
-.month-b-cell.load-busy:not(.outside){background:color-mix(in srgb,var(--sand) 30%,var(--sf))}
-.month-b-cell.load-packed:not(.outside){background:color-mix(in srgb,var(--hero) 26%,var(--sf))}
-.month-b-cell.load-packed .load-tag{color:#8A3A22}
-.load-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mu);font-weight:600}
-.load-legend span{display:inline-flex;align-items:center;gap:6px}
-.load-legend i{width:14px;height:14px;border-radius:4px;border:1px solid var(--ln)}
-.load-legend i.load-free{background:color-mix(in srgb,var(--sage) 35%,var(--sf))}
-.load-legend i.load-light{background:var(--sf)}
-.load-legend i.load-busy{background:color-mix(in srgb,var(--sand) 60%,var(--sf))}
-.load-legend i.load-packed{background:color-mix(in srgb,var(--hero) 55%,var(--sf))}
-.year-month .mini-cal a.load-free{background:color-mix(in srgb,var(--sage) 30%,transparent)}
-.year-month .mini-cal a.load-light{background:var(--sf)}
-.year-month .mini-cal a.load-busy{background:color-mix(in srgb,var(--sand) 75%,transparent)}
-.year-month .mini-cal a.load-packed{background:var(--hero);color:#141414}
-.year-month .mini-cal a.today{box-shadow:inset 0 0 0 2px var(--tx);font-weight:700}
-.load-pill{font-size:10px;font-weight:600;border-radius:999px;padding:1px 8px;margin-top:2px;white-space:nowrap;color:#141414}
-.load-pill.load-free{background:color-mix(in srgb,var(--sage) 45%,var(--sf))}
-.load-pill.load-light{background:var(--card)}
-.load-pill.load-busy{background:var(--sand)}
-.load-pill.load-packed{background:var(--hero)}
-.timegrid.single .load-pill{margin:0 0 0 6px}
-@media(max-width:760px){.load-tag{display:none}}
-.zoom-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--tx);background:transparent;color:var(--tx);border-radius:999px;padding:6px 14px 6px 10px;font:600 13px var(--font-body);cursor:pointer;min-height:36px}
-.zoom-btn:hover:not(:disabled){background:var(--ink);color:var(--ink-tx)}
-.zoom-btn:disabled{opacity:.35;cursor:default}
-@media(max-width:600px){.zoom-btn span{display:none}.zoom-btn{padding:6px 9px}}
-.load-count{font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;color:#141414;white-space:nowrap;background:var(--card)}
-.load-count small{font-weight:600;opacity:.75}
-.load-count.load-busy{background:var(--sand)}
-.load-count.load-packed{background:var(--hero)}
-.month-b-week{min-height:124px}
-@media(max-width:760px){.load-count small{display:none}}
 /* ---------- 1.05 small fixes ---------- */
 input[type=checkbox],input[type=radio]{width:18px!important;height:18px!important;min-width:18px;flex:0 0 auto;padding:0!important;margin:2px 0 0;box-shadow:none!important;border-radius:4px!important;accent-color:var(--tx);vertical-align:middle}
 input[type=radio]{border-radius:50%!important}
@@ -907,48 +773,6 @@ input[type=radio]{border-radius:50%!important}
 /* Home: Needs attention on its own (revenue lives in Reports) */
 .overview-row.single{display:grid;grid-template-columns:1fr;margin-top:16px}
 
-/* ---------- project timeline (1.08): day columns, today line, clean bar ends ---------- */
-.wt-grid{position:relative;gap:6px}
-.wt-ticks,.wt-row{grid-template-columns:160px minmax(0,1fr)}
-.wt-ticks{align-items:end;padding-bottom:2px}
-.wt-days{display:grid;border-bottom:1px solid var(--ln)}
-.wt-days span{position:relative;display:grid;justify-items:center;gap:1px;padding:16px 0 6px;font-size:11px;color:var(--mu);min-width:0;border-radius:10px 10px 0 0}
-.wt-days span small{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;opacity:.8}
-.wt-days span b{font-size:12px;font-weight:600;color:var(--tx);font-variant-numeric:tabular-nums}
-.wt-days span.shade b{color:var(--mu)}
-
-.wt-days span.today b{background:var(--hero);color:#141414;border-radius:99px;min-width:22px;padding:1px 5px;text-align:center}
-.wt-days span em{position:absolute;top:0;left:2px;font-style:normal;font-size:10px;font-weight:700;color:var(--tx);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
-.zoom-month:not(.sliding) .wt-days span:not(.first):not(.today) small{visibility:hidden}
-.zoom-year .wt-days span{padding-top:6px}
-.wt-name{padding-top:9px}
-.wt-name span{overflow:hidden;text-overflow:ellipsis}
-.wt-row .wt-track{background:var(--sf);border-radius:14px;overflow:hidden;min-height:42px}
-.wt-cols{position:absolute;inset:0;display:grid;pointer-events:none}
-.wt-cols span{border-left:1px solid transparent}
-.wt-cols span.first{border-left-color:color-mix(in srgb,var(--ln) 80%,transparent)}
-.wt-cols span.shade{background:color-mix(in srgb,var(--tx) 4%,transparent)}
-.wt-cols span.today{background:color-mix(in srgb,var(--hero) 14%,transparent)}
-.wt-bar{height:30px;border-radius:10px;margin:0;padding:0 12px;gap:10px;background:var(--bar);box-shadow:0 1px 0 #14141414,inset 0 0 0 1px #14141410;z-index:1;transition:transform .12s,box-shadow .12s}
-.wt-bar:hover{transform:translateY(-1px);box-shadow:0 6px 16px #14141422}
-.wt-bar:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
-.wt-bar b{font-size:12.5px}
-.wt-bar small{font-size:11px;opacity:.7;overflow:hidden;text-overflow:ellipsis}
-.wt-bar.before{border-top-left-radius:0;border-bottom-left-radius:0;padding-left:8px}
-.wt-bar.after{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:8px}
-.wt-bar.ongoing{background:linear-gradient(90deg,var(--bar) 0,var(--bar) calc(100% - 56px),color-mix(in srgb,var(--bar) 25%,transparent) 100%)}
-.wt-arrow{font-size:16px;font-weight:700;opacity:.55;line-height:1;flex:0 0 auto}
-.wt-bar.after .wt-arrow:last-child{margin-left:auto}
-.wt-now{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--hero-deep,#D27556);border-radius:2px;z-index:2;opacity:.9}
-/* sliding timeline: fixed-width days; the client names stay pinned while the dates slide */
-.work-timeline{--wt-name:160px}.work-timeline .block-head{flex-wrap:wrap;gap:8px}
-.wt-nav{display:flex;align-items:center;gap:6px;margin-left:auto}.wt-month{font-family:var(--font-display);font-size:15px;font-weight:600;margin-right:6px;white-space:nowrap}.wt-nav .icon-button{width:34px;height:34px}
-.wt-scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;cursor:grab;margin:0;padding:0 0 6px}
-.wt-scroll.dragging{cursor:grabbing;user-select:none}.wt-scroll:focus-visible{outline:2px solid var(--tx);outline-offset:2px;border-radius:12px}
-.wt-scroll .wt-grid{width:max-content;gap:0}.wt-scroll .wt-ticks,.wt-scroll .wt-row{column-gap:0}.wt-scroll .wt-row .wt-track{margin-bottom:6px}
-.wt-scroll .wt-name{position:sticky;left:0;z-index:3;background:var(--card);align-self:stretch;padding-right:12px;box-shadow:8px 0 10px -8px #14141433}
-.wt-scroll .wt-days span em{left:4px}
-@media(max-width:760px){.wt-ticks,.wt-row{grid-template-columns:96px minmax(0,1fr)}.work-timeline{--wt-name:96px}.zoom-month:not(.sliding) .wt-days span:not(.first):not(.today) b{visibility:hidden}.wt-bar small{display:none}}
 
 /* repeat on chosen days */
 .repeat-days{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 4px}
@@ -1092,16 +916,10 @@ input[type=radio]{border-radius:50%!important}
 .docs-only{display:grid;gap:12px}
 .excel-soon{display:flex;align-items:center;gap:10px;margin:0;color:var(--mu);font-size:13.5px;flex-wrap:wrap}
 /* dark mode fixes (1.09): calendar chips, day counts, timeline captions, task ticks, delete buttons */
-:root[data-theme=dark] .cal-chip{background:color-mix(in srgb,var(--tone,var(--hero)) 38%,#1b1916)!important;color:#f3eee6;box-shadow:inset 3px 0 0 var(--tone,var(--hero))}
-:root[data-theme=dark] .load-count{color:var(--tx)}
-:root[data-theme=dark] .load-count.load-busy,:root[data-theme=dark] .load-count.load-packed{color:#141414}
-:root[data-theme=dark] .wt-bar{color:#141414}
-:root[data-theme=dark] .wt-bar small{color:#141414;opacity:.75}
 :root[data-theme=dark] .chk{color:var(--tx)}
 :root[data-theme=dark] .ghost.danger{color:#F2A08A;border-color:#F2A08A}
 :root[data-theme=dark] .thread-msg.client{background:color-mix(in srgb,var(--hero) 30%,var(--card))}
 :root[data-theme=dark] .notif-item.new{background:color-mix(in srgb,var(--hero) 20%,transparent)}
-:root[data-theme=dark] .cal-chip,:root[data-theme=dark] .cal-chip .cal-title,:root[data-theme=dark] .cal-chip .cal-time{color:#f3eee6!important}
 
 /* client requests */
 .request-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
@@ -1252,7 +1070,6 @@ input[type=radio]{border-radius:50%!important}
 
 .reports-invoices{margin-top:28px}.reports-invoices .hd h2{margin:0;font-size:26px}
 
-.wt-days span[role=button]{cursor:pointer;border-radius:10px 10px 0 0}.wt-days span[role=button]:hover{background:color-mix(in srgb,var(--hero) 18%,transparent)}
 
 /* ---------- 1.21: themed checkboxes and scrollbars everywhere ---------- */
 input[type=checkbox]{appearance:none;-webkit-appearance:none;width:20px!important;height:20px!important;min-width:20px;min-height:0!important;margin:0;padding:0!important;border:1.5px solid var(--tx)!important;border-radius:6px!important;background:var(--sf)!important;box-shadow:none!important;display:inline-grid;place-items:center;cursor:pointer;vertical-align:middle;transition:background .15s,border-color .15s;flex-shrink:0}
@@ -1301,37 +1118,6 @@ label:has(>input[type=checkbox]){display:inline-flex;align-items:center;gap:8px;
 .notif-head{gap:10px;flex-wrap:wrap}
 .notif-item b{overflow-wrap:anywhere}
 
-/* Phone calendar: clear rows, compact secondary actions, full-width view switch. */
-@media(max-width:600px){
-  .calendar-b .page-head{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}
-  .calendar-b .page-head>.grow{grid-column:1/-1;min-width:0}
-  .calendar-b .page-head .empty-note{display:none}
-  .calendar-b .page-head>.ghost{font-size:12px;padding:8px 10px;min-height:40px;justify-content:center;gap:6px}
-  .calendar-b .page-head>.btn{grid-column:1/-1;justify-self:end;min-height:40px;font-size:13px;padding:8px 16px}
-  .calendar-b .cal-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px 6px}
-  .calendar-b .cal-label{grid-column:1;grid-row:1;order:0;width:auto;font-size:20px;margin:0}
-  .calendar-b .cal-toolbar>.ghost{grid-column:2;grid-row:1;min-height:40px;padding:6px 12px}
-  .calendar-b .cal-step{grid-column:3;grid-row:1;display:flex}
-  .calendar-b .cal-step .icon-x{width:40px;height:40px}
-  .calendar-b .cal-zoom{grid-column:1/-1;display:block;min-width:0}
-  .calendar-b .cal-zoom>.zoom-btn{display:none}
-  .calendar-b .cal-zoom .tabs-pill{display:flex;width:100%;box-sizing:border-box}
-  .calendar-b .cal-zoom .tabs-pill button{flex:1;min-width:0;min-height:40px;padding:8px 4px;font-size:13px}
-  .calendar-b .cal-filters{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
-  .calendar-b .cal-filters>.select-control{grid-column:1/-1;min-width:0;width:100%}
-  .calendar-b .cal-filters .select-trigger{min-height:40px;font-size:13px}
-  .calendar-b .cal-check{font-size:12px;gap:6px;min-height:36px;margin:0}
-  .calendar-b .load-legend{gap:8px 12px;font-size:11px}
-  .calendar-b .load-legend i{width:10px;height:10px}
-  .calendar-b .work-timeline{padding:14px;gap:10px;border-radius:20px}
-  .calendar-b .work-timeline .block-head{gap:6px}
-  .calendar-b .work-timeline h3{font-size:19px;line-height:1.25;width:100%;margin:0}
-  .calendar-b .work-timeline .block-head>small{font-size:12px;width:100%}
-  .calendar-b .wt-nav{width:100%;margin:4px 0 0;gap:4px}
-  .calendar-b .wt-month{font-size:13px;margin-right:auto}
-  .calendar-b .wt-nav .icon-button{width:40px;height:40px;min-width:40px}
-  .calendar-b .wt-nav .ghost{min-height:40px;padding:6px 12px}
-}
 
 /* Mobile navigation and touch editing; desktop keeps its original controls. */
 .mobile-home-tasks,.keep-touch-hint{display:none}

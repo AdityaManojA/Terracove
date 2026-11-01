@@ -1,7 +1,7 @@
 /* Shared header geometry; keep every action together after the save indicator. */
 .topbar-right{gap:14px;min-width:0}.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .topbar .header-actions .icon-button,.topbar .header-actions .signout-button{display:inline-flex;align-items:center;justify-content:center;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0;border-width:2px;border-radius:15px;line-height:1;flex-shrink:0;margin:0}
-.header-actions .signout-button span{display:none}.topbar .header-actions .workspace-search{font-size:28px!important}.topbar .header-actions .command-trigger{font-size:25px}.calendar-move-status:empty{display:none}
+.header-actions .signout-button span{display:none}.topbar .header-actions .workspace-search{font-size:28px!important}.topbar .header-actions .command-trigger{font-size:25px}
 @media(max-width:768px){.topbar-right{gap:0}.header-actions{gap:7px}.topbar .save-state,.topbar .demo-badge{display:none}.page-calendar .page-kicker{display:none}}
 @media(max-width:360px){.header-actions{gap:5px}.topbar{gap:6px;padding-left:10px;padding-right:10px}.topbar .header-actions .icon-button,.topbar .header-actions .signout-button{width:38px!important;min-width:38px!important;height:42px!important;min-height:42px!important;border-radius:13px}.header-brand .brand-lockup>span{font-size:17px}}
 @media print{.header-actions{display:none}}
@@ -10,5 +10,4 @@
 @media(max-width:768px){
   .topbar .header-actions .header-link{display:none!important}
 }
-/* Source counts stay visible even when a crowded date truncates title previews. */
 

@@ -9,6 +9,7 @@ import './responsive.css';
 import './scrollbars.css';
 import './calendar-refresh.css';
 import './theme.css';
+import './calendar.css';
 // Keep phone gestures at the app's scale; restore normal browser zoom on desktop.
 function MobileViewport() {
   React.useEffect(() => {

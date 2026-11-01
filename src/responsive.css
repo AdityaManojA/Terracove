@@ -1,13 +1,6 @@
 /* Shared layouts: let content shrink and wrap instead of overflowing the page. */
 .page-content,.hd>*,.grid2>*,.cards>*,.integration-grid>*,.sheet,.dlg,.row>div,.section-head>div{min-width:0}
-.row b,.row small,.project-card h3,.event-inspector h2,.event-inspector p,.sheet,.connection-notice,.key-list{overflow-wrap:anywhere}
-.calendar-move-status{font-size:13px;color:var(--mu);margin:0 0 12px}
-.calendar-move-status{min-height:22px;color:var(--tx);font-weight:650}
-.calendar-drag-preview{position:fixed;z-index:120;pointer-events:none;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 12px;border:2px solid var(--ln);border-radius:10px;background:var(--butter);color:var(--tx);font-size:12px;font-weight:700;box-shadow:0 6px 22px #0003}
-.calendar-move-form{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;border-top:1px solid var(--gridline);padding-top:18px}
-.calendar-move-form label{flex:1;min-width:min(160px,100%);max-width:100%;margin:0}
-.calendar-move-form>p{flex-basis:100%;margin:0}
-.event-inspector{bottom:132px;max-height:min(70dvh,calc(100dvh - 244px))}
+.row b,.row small,.project-card h3,.sheet,.connection-notice,.key-list{overflow-wrap:anywhere}
 
 @media screen and (max-width:768px){
   .page-calendar>.page-kicker{display:none}
@@ -28,10 +21,6 @@
   .row .grow{flex-basis:50%}
   .task-row>select{max-width:100%}
   .card b,.cards b{overflow-wrap:anywhere}
-  .more-events{min-height:28px;width:100%}
-  .event-inspector{left:16px;right:16px;width:auto;max-width:calc(100vw - 32px);margin:0 auto;transform:none;box-sizing:border-box;overflow-x:hidden;bottom:calc(120px + env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 228px - env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
-  .event-inspector p{overflow-wrap:anywhere}
-  .event-inspector .section-head{gap:10px}
   .ov{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
   .dlg{padding:20px 18px 0;max-height:calc(100dvh - 24px);overscroll-behavior:contain;scroll-padding-bottom:100px}
   .dialog-title{gap:10px;align-items:flex-start}
@@ -62,8 +51,6 @@
   .invoice-summary>div{border-right:0;border-bottom:2px solid var(--ln);padding:15px 18px}
   .invoice-summary strong{font-size:28px;margin-top:4px}
   .invoice-summary small{font-size:12px}
-  .calendar-move-form>.btn{width:100%}
-  .calendar-move-status{font-size:12px}
   .topbar{gap:10px}
   .topbar-right{gap:6px}
   .topbar .save-state{font-size:10px;max-width:85px;text-align:center;white-space:normal}
@@ -78,4 +65,3 @@
   .login-story h1{font-size:38px}
   .login-panel{padding:30px 20px}
 }
-@media print{.calendar-drag-preview,.calendar-move-form,.calendar-move-status{display:none!important}}

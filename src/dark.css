@@ -71,8 +71,6 @@
 :root[data-theme=dark] .dock-add {background:var(--action);color:var(--action-ink)}
 :root[data-theme=dark] .dock-add:focus-visible {outline-color:var(--focus)}
 :root[data-theme=dark] .weekdays {background:#252c34;color:#d5dce5;border-color:var(--gridline)}
-:root[data-theme=dark] .event-inspector {box-shadow:0 14px 60px #0009}
-:root[data-theme=dark] .event-inspector:focus {outline-color:var(--focus)}
 :root[data-theme=dark] .login-story {background:#20313f;color:var(--tx);border-color:var(--ln)}
 :root[data-theme=dark] .login-story .wordmark,
 :root[data-theme=dark] .login-story h1 em {color:var(--tx)}

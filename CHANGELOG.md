@@ -2,11 +2,11 @@
 
 The same notes appear in the app under **Settings → What's new**, and people who used an earlier version see a short "SoloDesk updated" note the first time they open a new one. The source of truth is [`src/changelog.js`](src/changelog.js); keep this file in step with it.
 
-## 1.25 — Unreleased · A calmer mobile workspace
+## 1.25 — 1 November 2026 · A calmer mobile workspace
 
 - Mobile page zoom is locked, including input-focus zoom; calendar view controls and desktop browser zoom remain available.
 - Notifications stay within the viewport, with scrolling for longer lists.
-- Mobile calendar controls use separate compact rows; desktop calendar layout is unchanged.
+- Calendar rebuilt for phones: swipe to change period, pinch to zoom, bottom-sheet details with swipe-down and back-button close, press-and-hold drag, and iOS / Android motion.
 - Mobile Home Today items open the calendar day view with that task selected; the extra View full calendar button is hidden.
 - Notes replaces Tasks in the mobile dock. Tasks is accessible directly from Home on mobile.
 - Swipe a checklist item right to indent and left to outdent on mobile. Vertical scrolling, reminder controls and desktop keyboard editing are preserved.

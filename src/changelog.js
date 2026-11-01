@@ -2,8 +2,8 @@
 // Newest first. Add an entry for every user-facing change: put it in the unreleased version while it is
 // being built, and set released + date when it ships.
 export const changelog=[
-  {version:'1.25',released:false,title:'A calmer mobile workspace',highlights:[
-    ['Mobile calendar','Clearer rows for date navigation, calendar views and filters, with compact actions and a quieter project timeline. Desktop calendar controls are unchanged.'],
+  {version:'1.25',released:true,date:'2026-11-01',title:'A calmer mobile workspace',highlights:[
+    ['A rebuilt calendar','Made for phones first. Swipe sideways to change the month, week or day, pinch to zoom between Year, Month, Week and Day, and tap the title to zoom out. On a phone the month shows dots per day and the selected day’s plan underneath. Item details open in a bottom sheet you can swipe down to close; the back button closes it too. Press and hold an item to drag it to another day. Motion follows your phone: iPhone springs, Android Material curves and an Add button. On a laptop, swipe with two fingers on the trackpad.'],
     ['App-like mobile zoom','The page stays at its normal scale on mobile, including when entering text. Calendar view buttons still work; desktop browser zoom is unchanged.'],
     ['Notes at your fingertips','Notes replaces Tasks in the mobile dock. Open Tasks directly from Home. Swipe right on a checklist item to indent, or left to outdent; desktop keeps Tab and Shift+Tab.'],
     ['Job title on invoices','Add your job title in Settings → General, or on a single draft invoice. It appears under your name in the From section.'],
