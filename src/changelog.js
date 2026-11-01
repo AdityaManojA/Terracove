@@ -2,6 +2,11 @@
 // Newest first. Add an entry for every user-facing change: put it in the unreleased version while it is
 // being built, and set released + date when it ships.
 export const changelog=[
+  {version:'1.26',released:true,date:'2026-11-02',title:'A quieter month',highlights:[
+    ['A cleaner month view','Each day lists only its tasks and events, with a coloured dot for the client and the time. Project bars and item counts are gone from the grid; running projects are in the day panel and the timeline. The chosen day gets a soft tint instead of a black outline.'],
+    ['Slide through the timeline','In Month, Week and Day, What you’re working on is a strip of days again: drag it with the mouse, swipe it on a phone, or use the arrows and Today. Client names stay pinned while you scroll, and short projects show their name beside the bar instead of being cut off.'],
+    ['Swipe between days and weeks','In Week and Day, swipe sideways to move to the next or previous period. On a laptop you can also drag an empty part of the calendar with the mouse.'],
+  ],fixes:['On phones the year timeline scrolls sideways instead of squeezing twelve months into the screen.']},
   {version:'1.25',released:true,date:'2026-11-01',title:'A calmer mobile workspace',highlights:[
     ['A rebuilt calendar','Made for phones first. Swipe sideways to change the month, week or day, pinch to zoom between Year, Month, Week and Day, and tap the title to zoom out. On a phone the month shows dots per day and the selected day’s plan underneath. Item details open in a bottom sheet you can swipe down to close; the back button closes it too. Press and hold an item to drag it to another day. Motion follows your phone: iPhone springs, Android Material curves and an Add button. On a laptop, swipe with two fingers on the trackpad.'],
     ['App-like mobile zoom','The page stays at its normal scale on mobile, including when entering text. Calendar view buttons still work; desktop browser zoom is unchanged.'],

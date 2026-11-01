@@ -14,9 +14,13 @@ Big shoutout to her for laying the foundation for this project!
 
 Original contributions by AdityaManojA are available under the [MIT License](LICENSE). The original MVP currently has no published license; inherited code and third-party dependencies are excluded from that grant. See [third-party notices and licensing scope](THIRD_PARTY_NOTICES.md) before reusing the combined application.
 
-A business workspace for independent professionals and studios: clients, projects, tasks, invoices, payments and reports. **Current version: 1.25** ([release notes](CHANGELOG.md), also in the app under Settings → What's new). The interface uses the 1.02 design: a black sidebar, the Terracotta palette (sage, sand, cream) with a per-workspace action colour, Bricolage Grotesque and Figtree type, and a floating dock on phones. The original React/Firebase data model and hash routes are retained. Calendar exports turn project timelines and dated tasks into scheduler events.
+A business workspace for independent professionals and studios: clients, projects, tasks, invoices, payments and reports. **Current version: 1.26** ([release notes](CHANGELOG.md), also in the app under Settings → What's new). The interface uses the 1.02 design: a black sidebar, the Terracotta palette (sage, sand, cream) with a per-workspace action colour, Bricolage Grotesque and Figtree type, and a floating dock on phones. The original React/Firebase data model and hash routes are retained. Calendar exports turn project timelines and dated tasks into scheduler events.
 
 > **Picking this project up?** Start with [docs/CONTEXT-HISTORY.md](docs/CONTEXT-HISTORY.md): current state, release checklist, standing decisions and open items.
+
+## What's new in 1.26
+
+A quieter month: the month grid lists only tasks and events with a soft selected-day tint, the project timeline slides again (drag, swipe or arrows), and Week and Day page with a swipe or a mouse drag. See CHANGELOG.md.
 
 ## What's new in 1.25
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { calendarEvents, calendarIcs } from '../functions/calendar';
 import { download, today } from './lib';
 import { localDay, monthDays, onDay, matchesCalendarFilters, sortCalendarItems, ZOOMS, zoomRange, shiftZoom, spanLanes, rangeFraction, layoutTimed, addDaysKey, weekStartKey, dayLoad } from './calendar-view';
@@ -22,7 +22,6 @@ const TONES = ['var(--hero)', 'var(--sage)', 'var(--sand)', 'var(--hero-deep)', 
 const fmt = (day, o) => new Date(day + 'T12:00:00').toLocaleDateString(undefined, o);
 const clock = iso => new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 const shared = e => e.source === 'taskflow';
-const multiDay = e => e.allDay && (e.type === 'project' || addDaysKey(e.start, 1) < e.end);
 const validDay = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v + 'T12:00:00'));
 const loadText = (load, day, t) => load.count ? `${load.count} item${load.count === 1 ? '' : 's'}${load.clients > 1 ? ` · ${load.clients} clients` : ''}` : day >= t ? 'Free' : 'Nothing scheduled';
 
@@ -138,7 +137,6 @@ export default function Calendar({ d, mut, open, user, taskflow, toast = () => {
           <Pager {...pagerProps} pageKey={day.slice(0, 7)} label="Month. Swipe sideways for other months."
             render={o => <MonthPane {...shared3} month={shiftZoom('month', day, o).slice(0, 7)} day={day} compact={compact}
               onTap={k => compact && k === day ? zoomTo('day', k) : setDay(k)} onOpenDay={k => zoomTo('day', k)} />} />
-          {!compact && <LoadLegend />}
         </>}
 
         {zoom === 'day' && <WeekStrip day={day} events={events} t={t} platform={platform} onPick={setDay} onStep={dir => setDay(addDaysKey(day, 7 * dir))} />}
@@ -189,37 +187,30 @@ function YearPane({ year, events, t, onDay, onMonth }) {
   })}</div>;
 }
 
+// Month: a quiet grid. Each day lists its tasks and events (projects live in the timeline and the day panel).
 function MonthPane({ month, day, events, t, compact, tone, dragProps, cellProps, over, onTap, onOpenDay, onOpen }) {
   const weeks = useMemo(() => { const g = monthDays(month); return Array.from({ length: 6 }, (_, i) => g.slice(i * 7, i * 7 + 7)); }, [month]);
-  const chip = (e, k) => <button key={e.id} type="button" className={'cv-chip' + (shared(e) ? ' shared' : '')} style={tone(e)} {...dragProps(e, k)} onClick={ev => { ev.stopPropagation(); onOpen(e.id); }} title={e.title}>
-    {!e.allDay && <span className="cv-chip-time">{clock(e.start)}</span>}<span className="cv-chip-title">{e.title}</span></button>;
+  const itemsOn = k => sortCalendarItems(events.filter(e => e.type !== 'project' && onDay(e, k)));
   return <div className="cv-month" role="grid" aria-label={fmt(month + '-01', { month: 'long', year: 'numeric' })}>
     <div className="cv-dow" role="row">{DOW.map(x => <span key={x} role="columnheader" aria-label={x}>{compact ? x[0] : x}</span>)}</div>
-    {weeks.map(week => {
-      const spans = compact ? [] : spanLanes(events.filter(multiDay), week), lanes = Math.min(3, spans.reduce((n, s) => Math.max(n, s.lane + 1), 0));
-      return <div className="cv-week" role="row" key={week[0]}>
-        {week.map((k, i) => {
-          const items = sortCalendarItems(events.filter(e => onDay(e, k))), load = dayLoad(events, k);
-          const cls = 'cv-cell load-' + load.level + (k.slice(0, 7) !== month ? ' is-out' : '') + (k === t ? ' is-today' : '') + (k === day ? ' is-sel' : '') + (over === k ? ' is-drop' : '') + (k < t ? ' is-past' : '');
-          const name = fmt(k, { dateStyle: 'full' }) + ', ' + loadText(load, k, t);
-          if (compact) return <button key={k} type="button" role="gridcell" aria-selected={k === day} aria-label={name} className={cls} style={{ gridColumn: i + 1 }} {...cellProps(k)} onClick={() => onTap(k)}>
-            <span className="cv-num">{+k.slice(8)}</span>
-            <span className="cv-dots" aria-hidden="true">{items.slice(0, 3).map(e => <i key={e.id} className={shared(e) ? 'shared' : e.type === 'project' ? 'span' : ''} style={tone(e)} />)}{items.length > 3 && <em>+{items.length - 3}</em>}</span>
-          </button>;
-          const singles = items.filter(e => !multiDay(e)), hidden = spans.filter(s => s.lane >= 3 && s.col <= i && i < s.col + s.span).length;
-          const shown = singles.slice(0, 3), extra = singles.length - shown.length + hidden;
-          return <div key={k} role="gridcell" aria-selected={k === day} className={cls} style={{ gridColumn: i + 1 }} {...cellProps(k)} onClick={() => onTap(k)}>
-            <div className="cv-cell-top">
-              <button type="button" className="cv-num" onClick={ev => { ev.stopPropagation(); onOpenDay(k); }} aria-label={name + ', open day'}>{+k.slice(8)}{k.slice(8) === '01' ? ' ' + fmt(k, { month: 'short' }) : ''}</button>
-              {load.count > 0 && <span className={'cv-load load-' + load.level} title={loadText(load, k, t)} aria-hidden="true">{load.count}</span>}
-            </div>
-            <div className="cv-cell-items" style={{ marginTop: lanes * 24 }}>{shown.map(e => chip(e, k))}{extra > 0 && <button type="button" className="cv-more" onClick={ev => { ev.stopPropagation(); onOpenDay(k); }}>+{extra} more</button>}</div>
-          </div>;
-        })}
-        {spans.filter(s => s.lane < 3).map(s => <button key={s.event.id + week[0]} type="button" className={'cv-span' + (s.before ? ' cut-l' : '') + (s.after ? ' cut-r' : '') + (shared(s.event) ? ' shared' : '')}
-          style={{ gridColumn: `${s.col + 1} / span ${s.span}`, top: 36 + s.lane * 24, ...tone(s.event) }} {...dragProps(s.event, week[s.col])} onClick={ev => { ev.stopPropagation(); onOpen(s.event.id); }} title={s.event.title}>{s.event.title}</button>)}
-      </div>;
-    })}
+    {weeks.map(week => <div className="cv-week" role="row" key={week[0]}>
+      {week.map(k => {
+        const items = itemsOn(k), load = dayLoad(events, k);
+        const cls = 'cv-cell' + (k.slice(0, 7) !== month ? ' is-out' : '') + (k === t ? ' is-today' : '') + (k === day ? ' is-sel' : '') + (over === k ? ' is-drop' : '');
+        const name = fmt(k, { dateStyle: 'full' }) + ', ' + (items.length ? `${items.length} item${items.length === 1 ? '' : 's'}` : loadText(load, k, t));
+        if (compact) return <button key={k} type="button" role="gridcell" aria-selected={k === day} aria-label={name} className={cls} {...cellProps(k)} onClick={() => onTap(k)}>
+          <span className="cv-num">{+k.slice(8)}</span>
+          <span className="cv-dots" aria-hidden="true">{items.slice(0, 3).map(e => <i key={e.id} className={shared(e) ? 'shared' : ''} style={tone(e)} />)}</span>
+        </button>;
+        const shown = items.length > 3 ? items.slice(0, 2) : items, extra = items.length - shown.length;
+        return <div key={k} role="gridcell" aria-selected={k === day} className={cls} {...cellProps(k)} onClick={() => onTap(k)}>
+          <button type="button" className="cv-num" onClick={ev => { ev.stopPropagation(); onOpenDay(k); }} aria-label={name + ', open day'}>{+k.slice(8)}{k.slice(8) === '01' && <small>{fmt(k, { month: 'short' })}</small>}</button>
+          {shown.map(e => <button key={e.id} type="button" className={'cv-item' + (shared(e) ? ' shared' : '')} style={tone(e)} {...dragProps(e, k)} onClick={ev => { ev.stopPropagation(); onOpen(e.id); }} title={e.title}>
+            <i aria-hidden="true" />{!e.allDay && <time>{clock(e.start)}</time>}<span>{e.title}</span></button>)}
+          {extra > 0 && <button type="button" className="cv-more" onClick={ev => { ev.stopPropagation(); onOpenDay(k); }}>{extra} more</button>}
+        </div>;
+      })}
+    </div>)}
   </div>;
 }
 
@@ -328,46 +319,116 @@ function EventDetails({ e, tone, onMove, onEdit, onExport, onShowDay }) {
   </div>;
 }
 
-// "What you're working on": dated projects as bars across the visible period, one row per client.
-function lanesFor(bars) {
-  const ends = [];
-  return [...bars].sort((x, y) => x.f.left - y.f.left).map(bar => {
-    let lane = ends.findIndex(end => end <= bar.f.left + 0.0001);
-    if (lane < 0) { lane = ends.length; ends.push(0); }
-    ends[lane] = bar.f.left + bar.f.width;
-    return { ...bar, lane };
-  });
-}
+// "What you're working on": dated projects as bars, one row per client.
+// Month, week and day show a strip of days that grows as you scroll, so you can slide as far as you like:
+// drag it with the mouse, swipe it on a phone, or use the arrows. The year fits the width (phones scroll it).
+const SLIDE_DAYS = 60, EDGE_PX = 240, LANE = 34, CHAR = 6.6;
 function Timeline({ d, zoom, day, toneOf, completed, client, compact, onOpen, onPickDay }) {
-  const period = zoom === 'day' ? 'week' : zoom, range = zoomRange(period, day), t = today(), now = rangeFraction(t, addDaysKey(t, 1), range);
+  const period = zoom === 'day' ? 'week' : zoom, range = zoomRange(period, day), t = today(), sliding = period !== 'year';
+  const col = sliding ? (compact ? 38 : 44) : compact ? 72 : 0;
+  const around = () => ({ start: addDaysKey(range.start, -28), end: addDaysKey(range.end, 56) });
+  const [win, setWin] = useState(around), [mid, setMid] = useState(range.start), [fitW, setFitW] = useState(0);
+  const scroller = useRef(null), ticks = useRef(null), jump = useRef(28), shift = useRef(0), grab = useRef(null), grabbedAt = useRef(0);
+  const view = sliding ? win : range;
+
   const projects = d.projects.filter(p => !p.arch && (completed || p.status !== 'Complete') && (!client || p.client === client) && (p.start || p.end));
   const span = p => [p.start || p.end, p.end ? addDaysKey(p.end, 1) : addDaysKey(t, 3650)];
+  const cols = sliding
+    ? Array.from({ length: Math.round((Date.parse(view.end) - Date.parse(view.start)) / 864e5) }, (_, i) => { const k = addDaysKey(view.start, i), wd = new Date(k + 'T12:00:00').getDay(); return { key: k, top: fmt(k, { weekday: 'narrow' }), label: String(+k.slice(8)), today: k === t, shade: wd === 0 || wd === 6, month: k.slice(8) === '01' || i === 0 ? fmt(k, { month: 'short' }) : '' }; })
+    : Array.from({ length: 12 }, (_, i) => { const k = `${range.start.slice(0, 4)}-${String(i + 1).padStart(2, '0')}-01`; return { key: k, label: fmt(k, { month: compact ? 'short' : 'narrow' }), today: t.slice(0, 7) === k.slice(0, 7), shade: i % 2 === 1 }; });
+  const trackW = col ? cols.length * col : fitW;
+
+  // Bars are placed in pixels. A bar too short for its name gets the name beside it, and lanes leave room for that label.
   const rows = [];
   for (const c of [...d.clients.filter(c => !c.arch), { id: '', name: 'No client' }]) {
-    const bars = projects.filter(p => (p.client || '') === c.id).map(p => { const [s, e] = span(p); return { p, f: rangeFraction(s, e, range), ongoing: !p.end }; }).filter(x => x.f);
-    if (bars.length) { const laid = lanesFor(bars); rows.push({ c, bars: laid, lanes: Math.max(...laid.map(x => x.lane)) + 1 }); }
+    const placed = projects.filter(p => (p.client || '') === c.id).map(p => {
+      const [s, e] = span(p), f = rangeFraction(s, e, view); if (!f) return null;
+      const left = f.left * trackW + 2, w = Math.max(f.width * trackW - 4, 14), need = p.name.length * CHAR + 26, inside = w >= need;
+      let from = left, to = left + w, label = null;
+      if (!inside) {
+        const lw = Math.min(p.name.length * CHAR + 6, 200);
+        const room = trackW - (left + w + 6); // prefer the right side, shortened if needed; the left side can hide under the names
+        label = room >= Math.min(lw, 70) ? { left: left + w + 6, w: Math.min(lw, room) } : { left: Math.max(0, left - 6 - lw), w: lw, flip: true };
+        from = Math.min(from, label.left); to = Math.max(to, label.left + lw);
+      }
+      return { p, f, left, w, inside, meta: w >= need + 120, label, from, to, ongoing: !p.end };
+    }).filter(Boolean).sort((a, b) => a.from - b.from);
+    if (!placed.length) continue;
+    const ends = [];
+    for (const b of placed) { let lane = ends.findIndex(x => x <= b.from - 4); if (lane < 0) { lane = ends.length; ends.push(0); } ends[lane] = b.to; b.lane = lane; }
+    rows.push({ c, bars: placed, lanes: ends.length });
   }
-  const count = rows.reduce((n, r) => n + r.bars.length, 0), undated = d.projects.filter(p => !p.arch && p.status === 'Active' && !p.start && !p.end).length;
-  const cols = period === 'year'
-    ? Array.from({ length: 12 }, (_, i) => { const k = `${range.start.slice(0, 4)}-${String(i + 1).padStart(2, '0')}-01`; return { key: k, label: fmt(k, { month: 'narrow' }), today: t.slice(0, 7) === k.slice(0, 7), shade: i % 2 === 1 }; })
-    : Array.from({ length: Math.round((Date.parse(range.end) - Date.parse(range.start)) / 864e5) }, (_, i) => { const k = addDaysKey(range.start, i), wd = new Date(k + 'T12:00:00').getDay(); return { key: k, top: fmt(k, { weekday: 'narrow' }), label: String(+k.slice(8)), today: k === t, shade: wd === 0 || wd === 6 }; });
-  const label = p => `${p.start ? fmt(p.start, { day: 'numeric', month: 'short' }) : '?'} → ${p.end ? fmt(p.end, { day: 'numeric', month: 'short' }) : 'ongoing'}`;
+  const count = projects.filter(p => { const [s, e] = span(p); return rangeFraction(s, e, range); }).length, undated = d.projects.filter(p => !p.arch && p.status === 'Active' && !p.start && !p.end).length;
+  const now = rangeFraction(t, addDaysKey(t, 1), view), has = rows.length > 0;
+
+  // A new period (zoom, arrows, Today): rebuild the strip around it with its first day at the left.
+  useLayoutEffect(() => { if (sliding) { jump.current = 28; setWin(around()); setMid(range.start); } }, [range.start, sliding]);
+  useLayoutEffect(() => {
+    const el = scroller.current; if (!el || !sliding) return;
+    if (jump.current != null) { el.scrollLeft = jump.current * col; jump.current = null; el.style.setProperty('--sx', el.scrollLeft + 'px'); }
+    else if (shift.current) { el.scrollLeft += shift.current; shift.current = 0; }
+  }, [win, has, col]);
+  // Phones scroll the year: start with this month in view.
+  useLayoutEffect(() => { const el = scroller.current; if (el && !sliding && col) el.scrollLeft = range.start.slice(0, 4) === t.slice(0, 4) ? Math.max(0, (+t.slice(5, 7) - 2) * col) : 0; }, [range.start, sliding, col, has]);
+  useEffect(() => {
+    const el = ticks.current; if (!el || col) return;
+    const ro = new ResizeObserver(([entry]) => setFitW(entry.contentRect.width)); ro.observe(el); return () => ro.disconnect();
+  }, [col, has]);
+
+  const onScroll = () => {
+    const el = scroller.current; if (!el) return;
+    el.style.setProperty('--sx', el.scrollLeft + 'px');
+    if (!sliding) return;
+    const nameW = el.querySelector('.cv-wt-name')?.offsetWidth || 0, at = addDaysKey(win.start, Math.max(0, Math.floor((el.scrollLeft + (el.clientWidth - nameW) / 2) / col)));
+    if (at.slice(0, 7) !== mid.slice(0, 7)) setMid(at);
+    if (shift.current || jump.current != null) return;
+    if (el.scrollLeft < EDGE_PX) { shift.current = SLIDE_DAYS * col; setWin(w => ({ ...w, start: addDaysKey(w.start, -SLIDE_DAYS) })); }
+    else if (el.scrollLeft + el.clientWidth > el.scrollWidth - EDGE_PX) setWin(w => ({ ...w, end: addDaysKey(w.end, SLIDE_DAYS) }));
+  };
+  // Mouse: grab anywhere on the strip and drag it sideways. Touch and trackpads scroll natively.
+  const release = () => { grab.current = null; scroller.current?.classList.remove('is-grabbing'); };
+  const pointer = col ? {
+    onPointerDown: e => { if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('.cv-wt-name')) return; grab.current = { x: e.clientX, left: scroller.current.scrollLeft, moved: false, id: e.pointerId }; },
+    onPointerMove: e => {
+      const g = grab.current; if (!g) return;
+      const dx = e.clientX - g.x;
+      if (!g.moved && Math.abs(dx) > 4) { g.moved = true; scroller.current.classList.add('is-grabbing'); try { scroller.current.setPointerCapture(g.id); } catch { /* already released */ } }
+      if (g.moved) scroller.current.scrollLeft = g.left - dx;
+    },
+    onPointerUp: () => { if (grab.current?.moved) grabbedAt.current = performance.now(); release(); },
+    onPointerCancel: release,
+    onClickCapture: e => { if (performance.now() - grabbedAt.current < 250) { e.preventDefault(); e.stopPropagation(); } },
+  } : {};
+  const nudge = days => scroller.current?.scrollBy({ left: days * col, behavior: 'smooth' });
+  const goTo = k => { const el = scroller.current; if (el) el.scrollTo({ left: Math.max(0, (Math.round((Date.parse(k) - Date.parse(win.start)) / 864e5) - 2) * col), behavior: 'smooth' }); };
+
+  const dates = p => `${p.start ? fmt(p.start, { day: 'numeric', month: 'short' }) : '?'} to ${p.end ? fmt(p.end, { day: 'numeric', month: 'short' }) : 'ongoing'}`;
   const progress = p => { const all = d.tasks.filter(x => x.project === p.id && !x.arch); return all.length ? `${all.filter(x => x.status === 'Done').length}/${all.length} tasks` : ''; };
-  const minWidth = compact && period === 'month' ? `calc(var(--wt-name) + ${cols.length * 26}px)` : undefined;
+  const about = p => [p.name, dates(p), progress(p)].filter(Boolean);
+  const colsStyle = { gridTemplateColumns: col ? `repeat(${cols.length}, ${col}px)` : `repeat(${cols.length}, minmax(0, 1fr))` };
+  const rowStyle = { gridTemplateColumns: col ? `var(--wt-name) ${trackW}px` : 'var(--wt-name) minmax(0, 1fr)' };
   return <details className="cv-timeline" open={!compact}>
     <summary><span><b>What you’re working on</b><small>{count} project{count === 1 ? '' : 's'} this {period}{undated ? ` · ${undated} active without dates` : ''}</small></span><Icon name="chevronDown" size={18} /></summary>
-    {rows.length ? <div className="cv-hscroll"><div className="cv-wt" style={{ '--n': cols.length, minWidth }}>
-      <div className="cv-wt-row cv-wt-ticks"><span className="cv-wt-name" /><div className="cv-wt-cols">{cols.map(c => <button key={c.key} type="button" tabIndex={-1} className={(c.today ? 'is-today ' : '') + (c.shade ? 'shade' : '')} onClick={() => onPickDay(c.key)} aria-label={'Open ' + fmt(c.key, { dateStyle: 'full' })}>{c.top && <small>{c.top}</small>}<b>{c.label}</b></button>)}</div></div>
-      {rows.map(({ c, bars, lanes }) => <div className="cv-wt-row" key={c.id || 'none'}>
-        <a className="cv-wt-name" href={c.id ? '#/clients/' + c.id : '#/projects'}><i style={{ background: toneOf(c.id) || 'var(--card)' }} /><span>{c.name}</span></a>
-        <div className="cv-wt-track" style={{ height: lanes * 32 + 8 }}>
-          <div className="cv-wt-cols" aria-hidden="true">{cols.map(x => <span key={x.key} className={(x.shade ? 'shade ' : '') + (x.today ? 'is-today' : '')} />)}</div>
-          {now && <span className="cv-wt-now" aria-hidden="true" style={{ left: ((now.left + now.width / 2) * 100) + '%' }} />}
-          {bars.map(({ p, f, lane, ongoing }) => <button key={p.id} type="button" className={'cv-wt-bar' + (f.before ? ' cut-l' : '') + (f.after || ongoing ? ' cut-r' : '')}
-            style={{ left: `calc(${f.left * 100}% + 2px)`, width: `max(calc(${f.width * 100}% - 4px), 12px)`, top: 4 + lane * 32, '--tone': toneOf(c.id) || 'var(--card)', '--tone-ink': toneOf(c.id) ? '#141414' : 'var(--tx)' }}
-            onClick={() => onOpen('project-' + p.id)} title={[p.name, label(p), progress(p)].filter(Boolean).join(' · ')}><b>{p.name}</b><small>{[label(p), progress(p)].filter(Boolean).join(' · ')}</small></button>)}
-        </div>
-      </div>)}
-    </div></div> : <p className="cv-empty">No dated projects this {period}. Give a project a start date to see it here.</p>}
+    {has && sliding && <div className="cv-wt-nav"><b aria-live="polite">{fmt(mid, { month: 'long', year: 'numeric' })}</b>
+      <button type="button" className="cv-icon" aria-label="Earlier dates" onClick={() => nudge(-7)}><Icon name="left" size={18} /></button>
+      <button type="button" className="cv-pill" onClick={() => goTo(t)}>Today</button>
+      <button type="button" className="cv-icon" aria-label="Later dates" onClick={() => nudge(7)}><Icon name="arrow" size={18} /></button></div>}
+    {has ? <div ref={scroller} className={'cv-hscroll' + (col ? ' is-scroll' : '')} onScroll={onScroll} {...pointer} tabIndex={col ? 0 : undefined} aria-label={col ? 'Project timeline. Scroll sideways for more dates.' : undefined}>
+      <div className="cv-wt">
+        <div className="cv-wt-row cv-wt-ticks" style={rowStyle}><span className="cv-wt-name" /><div ref={ticks} className="cv-wt-cols" style={colsStyle}>{cols.map(c => <button key={c.key} type="button" tabIndex={-1} className={(c.today ? 'is-today ' : '') + (c.shade ? 'shade' : '')} onClick={() => onPickDay(c.key)} aria-label={'Open ' + fmt(c.key, { dateStyle: 'full' })}>
+          {sliding && <em>{c.month}</em>}{c.top && <small>{c.top}</small>}<b>{c.label}</b></button>)}</div></div>
+        {rows.map(({ c, bars, lanes }) => <div className="cv-wt-row" key={c.id || 'none'} style={rowStyle}>
+          <a className="cv-wt-name" href={c.id ? '#/clients/' + c.id : '#/projects'}><i style={{ background: toneOf(c.id) || 'var(--mu)' }} /><span>{c.name}</span></a>
+          <div className="cv-wt-track" style={{ height: lanes * LANE + 6, '--tone': toneOf(c.id) || 'var(--card)', '--tone-ink': toneOf(c.id) ? '#141414' : 'var(--tx)' }}>
+            <div className="cv-wt-cols" style={colsStyle} aria-hidden="true">{cols.map(x => <span key={x.key} className={(x.shade ? 'shade ' : '') + (x.today ? 'is-today' : '')} />)}</div>
+            {now && <span className="cv-wt-now" aria-hidden="true" style={{ left: (now.left + now.width / 2) * trackW }} />}
+            {bars.map(b => <button key={b.p.id} type="button" className={'cv-wt-bar' + (b.f.before ? ' cut-l' : '') + (b.f.after || b.ongoing ? ' cut-r' : '')} style={{ left: b.left, width: b.w, top: 4 + b.lane * LANE, '--l': b.left + 'px' }}
+              onClick={() => onOpen('project-' + b.p.id)} title={about(b.p).join(' · ')} aria-label={about(b.p).join(', ')}>
+              {b.inside && <b>{b.p.name}</b>}{b.meta && <small>{about(b.p).slice(1).join(' · ')}</small>}</button>)}
+            {bars.filter(b => b.label).map(b => <span key={b.p.id + '-l'} className={'cv-wt-label' + (b.label.flip ? ' flip' : '')} aria-hidden="true" style={{ left: b.label.left, width: b.label.w, top: 4 + b.lane * LANE }}>{b.p.name}</span>)}
+          </div>
+        </div>)}
+      </div>
+    </div> : <p className="cv-empty">No dated projects this {period}. Give a project a start date to see it here.</p>}
   </details>;
 }

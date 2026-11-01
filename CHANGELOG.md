@@ -2,6 +2,13 @@
 
 The same notes appear in the app under **Settings → What's new**, and people who used an earlier version see a short "SoloDesk updated" note the first time they open a new one. The source of truth is [`src/changelog.js`](src/changelog.js); keep this file in step with it.
 
+## 1.26 — 2 November 2026 · A quieter month
+
+- Month view rebuilt: each day lists only its tasks and events (client dot, time, title), with project bars and count badges removed. The chosen day gets a soft tint instead of a black outline.
+- What you're working on is a sliding strip of days again in Month, Week and Day: drag with the mouse, swipe on phones, or use the arrows and Today. Client names stay pinned; short projects show their name beside the bar.
+- Swipe sideways in Week and Day to change period; on a laptop, drag an empty part of the calendar with the mouse.
+- On phones the year timeline scrolls sideways instead of squeezing twelve months into the screen.
+
 ## 1.25 — 1 November 2026 · A calmer mobile workspace
 
 - Mobile page zoom is locked, including input-focus zoom; calendar view controls and desktop browser zoom remain available.

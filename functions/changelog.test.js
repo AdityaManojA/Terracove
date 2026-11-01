@@ -11,7 +11,7 @@ test('release notes are newest first, uniquely versioned and dated once released
     if(entry.released)assert.match(entry.date,/^\d{4}-\d{2}-\d{2}$/);
     assert.ok(entry.highlights.length&&entry.highlights.every(([title,text])=>title&&text));
   }
-  assert.equal(currentVersion(),'1.25');
+  assert.equal(currentVersion(),'1.26');
   assert.equal(shouldShowUpdate(null,false),false,'first visit: no update note');
   assert.equal(shouldShowUpdate('1.01',true),true);
   assert.equal(shouldShowUpdate('1.02',true),true);
@@ -36,10 +36,10 @@ test('release notes are newest first, uniquely versioned and dated once released
   assert.equal(shouldShowUpdate('1.21',true),true);
   assert.equal(shouldShowUpdate('1.22',true),true);
   assert.equal(shouldShowUpdate('1.23',true),true);
-  assert.equal(shouldShowUpdate('1.24',true),true);
-  assert.equal(shouldShowUpdate('1.25',true),false);
+  assert.equal(shouldShowUpdate('1.25',true),true);
+  assert.equal(shouldShowUpdate('1.26',true),false);
   assert.equal(shouldShowUpdate(null,true),true,'returning from before notes existed');
-  assert.equal(shouldShowUpdate('1.25',true,'u1|Mon 10:00','u1|Mon 10:00'),false,'same sign-in: shown already');
-  assert.equal(shouldShowUpdate('1.25',true,'u1|Tue 09:00','u1|Mon 10:00'),true,'a new sign-in shows it once more');
-  assert.equal(shouldShowUpdate('1.25',false,'u1|Tue 09:00',null),false,'brand-new people get the tour instead');
+  assert.equal(shouldShowUpdate('1.26',true,'u1|Mon 10:00','u1|Mon 10:00'),false,'same sign-in: shown already');
+  assert.equal(shouldShowUpdate('1.26',true,'u1|Tue 09:00','u1|Mon 10:00'),true,'a new sign-in shows it once more');
+  assert.equal(shouldShowUpdate('1.26',false,'u1|Tue 09:00',null),false,'brand-new people get the tour instead');
 });

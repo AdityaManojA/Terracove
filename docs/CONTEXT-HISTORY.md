@@ -12,7 +12,7 @@ app (Settings → What's new). **Read §1, §2 and §7 first if you are picking 
 | | |
 |---|---|
 | **Name** | **Terracove** (renamed from SoloDesk in 1.13) |
-| **Live** | **1.25** — https://terracove.web.app (the old address https://taskflow-solodesk.web.app redirects there) |
+| **Live** | **1.26** — https://terracove.web.app (the old address https://taskflow-solodesk.web.app redirects there) |
 | **Repo** | `D:\Projects\Terracove`, branch `main`, GitHub `AdityaManojA/Terracove`, tags `v1.02`…`v1.20` |
 | **Stack** | React 18 + Vite (Lightning CSS minifier), Firebase Auth / Firestore / Hosting, hash routes |
 | **Sister app** | **Levern** (formerly TaskFlow) — https://getlevern.web.app, repo `D:\Projects\TaskFlow-controls`, owned by another session. Terracove's UI says Levern; code keeps `taskflow*` names |

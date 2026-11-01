@@ -64,9 +64,12 @@ export const Pager = forwardRef(function Pager({ pageKey, onStep, render, platfo
   }, []);
 
   const down = e => {
-    if (e.pointerType === 'mouse' || busy.current || gesture.dragging) return;
+    if (busy.current || gesture.dragging) return;
+    const mouse = e.pointerType === 'mouse';
+    // Mouse: drag an empty part of the calendar to page; dragging an item still moves the item.
+    if (mouse && (e.button !== 0 || e.target.closest('.cv-ev,.cv-span,.cv-item,a,input,select,textarea'))) return;
     if (touch.current) { touch.current = null; place(0, 200); return; } // a second finger: leave it to pinch
-    if (e.clientX < EDGE || e.clientX > window.innerWidth - EDGE) return;
+    if (!mouse && (e.clientX < EDGE || e.clientX > window.innerWidth - EDGE)) return;
     touch.current = { id: e.pointerId, x0: e.clientX, y0: e.clientY, axis: null, dx: 0, samples: [[e.timeStamp, e.clientX]] };
   };
   const move = e => {
