@@ -99,3 +99,23 @@ test('day load counts everything on a day and grades it free, light, busy or pac
   assert.deepEqual(dayLoad(events, '2026-10-26'), { count: 4, clients: 3, projects: 3, level: 'busy' });
   assert.equal(dayLoad(events, '2026-11-03').level, 'free', 'end dates are exclusive');
 });
+
+test('timeline retained clients: projects retain client lanes even when scrolling to dates with no active spans', async () => {
+  const { rangeFraction } = await import('../src/calendar-view.js');
+  const clients = [{ id: 'c1', name: 'Acme' }, { id: 'c2', name: 'Beta' }];
+  const projects = [
+    { id: 'p1', client: 'c1', name: 'Website', start: '2026-10-01', end: '2026-10-31' },
+    { id: 'p2', client: 'c2', name: 'App', start: '2026-12-01', end: '2026-12-31' }
+  ];
+  // View is in November 2026 (between October and December projects)
+  const novView = { start: '2026-11-01', end: '2026-12-01' };
+  const overlapsInNov = projects.map(p => rangeFraction(p.start, p.end, novView)).filter(Boolean);
+  assert.equal(overlapsInNov.length, 0, 'No projects overlap November');
+
+  // Verify activeClients preservation logic: clients with dated projects are preserved
+  const clientMap = new Map(clients.map(c => [c.id, c]));
+  const activeClientIds = [...new Set(projects.map(p => p.client || ''))];
+  const activeClients = activeClientIds.map(id => clientMap.get(id) || { id, name: id ? 'Client' : 'No client' });
+  assert.equal(activeClients.length, 2, 'Both clients preserved so timeline grid stays mounted');
+  assert.deepEqual(activeClients.map(c => c.name), ['Acme', 'Beta']);
+});

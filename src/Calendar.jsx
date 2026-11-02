@@ -322,25 +322,32 @@ function EventDetails({ e, tone, onMove, onEdit, onExport, onShowDay }) {
 // "What you're working on": dated projects as bars, one row per client.
 // Month, week and day show a strip of days that grows as you scroll, so you can slide as far as you like:
 // drag it with the mouse, swipe it on a phone, or use the arrows. The year fits the width (phones scroll it).
-const SLIDE_DAYS = 60, EDGE_PX = 240, LANE = 34, CHAR = 6.6;
+const SLIDE_DAYS = 45, INIT_PAST_DAYS = 45, INIT_FUTURE_DAYS = 90;
+const MAX_PAST_DAYS = 365, MAX_FUTURE_DAYS = 540;
+const EDGE_PX = 200, LANE = 34, CHAR = 6.6;
 function Timeline({ d, zoom, day, toneOf, completed, client, compact, onOpen, onPickDay }) {
   const period = zoom === 'day' ? 'week' : zoom, range = zoomRange(period, day), t = today(), sliding = period !== 'year';
   const col = sliding ? (compact ? 38 : 44) : compact ? 72 : 0;
-  const around = () => ({ start: addDaysKey(range.start, -28), end: addDaysKey(range.end, 56) });
-  const [win, setWin] = useState(around), [mid, setMid] = useState(range.start), [fitW, setFitW] = useState(0);
-  const scroller = useRef(null), ticks = useRef(null), jump = useRef(28), shift = useRef(0), grab = useRef(null), grabbedAt = useRef(0);
+  const around = base => ({ start: addDaysKey(base, -INIT_PAST_DAYS), end: addDaysKey(base, INIT_FUTURE_DAYS) });
+  const [win, setWin] = useState(() => around(range.start)), [mid, setMid] = useState(range.start), [fitW, setFitW] = useState(0);
+  const scroller = useRef(null), ticks = useRef(null), jump = useRef(INIT_PAST_DAYS), shift = useRef(0), grab = useRef(null), grabbedAt = useRef(0), lastScrollAt = useRef(0), expanding = useRef(false);
   const view = sliding ? win : range;
 
   const projects = d.projects.filter(p => !p.arch && (completed || p.status !== 'Complete') && (!client || p.client === client) && (p.start || p.end));
+  const hasProjects = projects.length > 0;
   const span = p => [p.start || p.end, p.end ? addDaysKey(p.end, 1) : addDaysKey(t, 3650)];
   const cols = sliding
     ? Array.from({ length: Math.round((Date.parse(view.end) - Date.parse(view.start)) / 864e5) }, (_, i) => { const k = addDaysKey(view.start, i), wd = new Date(k + 'T12:00:00').getDay(); return { key: k, top: fmt(k, { weekday: 'narrow' }), label: String(+k.slice(8)), today: k === t, shade: wd === 0 || wd === 6, month: k.slice(8) === '01' || i === 0 ? fmt(k, { month: 'short' }) : '' }; })
     : Array.from({ length: 12 }, (_, i) => { const k = `${range.start.slice(0, 4)}-${String(i + 1).padStart(2, '0')}-01`; return { key: k, label: fmt(k, { month: compact ? 'short' : 'narrow' }), today: t.slice(0, 7) === k.slice(0, 7), shade: i % 2 === 1 }; });
   const trackW = col ? cols.length * col : fitW;
 
-  // Bars are placed in pixels. A bar too short for its name gets the name beside it, and lanes leave room for that label.
+  // Active client rows: show all clients who have dated projects so the timeline never collapses as you scroll
+  const clientMap = new Map(d.clients.map(c => [c.id, c]));
+  const activeClientIds = [...new Set(projects.map(p => p.client || ''))];
+  const activeClients = activeClientIds.map(id => clientMap.get(id) || { id, name: id ? 'Client' : 'No client' });
+
   const rows = [];
-  for (const c of [...d.clients.filter(c => !c.arch), { id: '', name: 'No client' }]) {
+  for (const c of activeClients) {
     const placed = projects.filter(p => (p.client || '') === c.id).map(p => {
       const [s, e] = span(p), f = rangeFraction(s, e, view); if (!f) return null;
       const left = f.left * trackW + 2, w = Math.max(f.width * trackW - 4, 14), need = p.name.length * CHAR + 26, inside = w >= need;
@@ -353,54 +360,115 @@ function Timeline({ d, zoom, day, toneOf, completed, client, compact, onOpen, on
       }
       return { p, f, left, w, inside, meta: w >= need + 120, label, from, to, ongoing: !p.end };
     }).filter(Boolean).sort((a, b) => a.from - b.from);
-    if (!placed.length) continue;
+
     const ends = [];
     for (const b of placed) { let lane = ends.findIndex(x => x <= b.from - 4); if (lane < 0) { lane = ends.length; ends.push(0); } ends[lane] = b.to; b.lane = lane; }
-    rows.push({ c, bars: placed, lanes: ends.length });
+    rows.push({ c, bars: placed, lanes: Math.max(1, ends.length) });
   }
   const count = projects.filter(p => { const [s, e] = span(p); return rangeFraction(s, e, range); }).length, undated = d.projects.filter(p => !p.arch && p.status === 'Active' && !p.start && !p.end).length;
-  const now = rangeFraction(t, addDaysKey(t, 1), view), has = rows.length > 0;
+  const now = rangeFraction(t, addDaysKey(t, 1), view);
 
   // A new period (zoom, arrows, Today): rebuild the strip around it with its first day at the left.
-  useLayoutEffect(() => { if (sliding) { jump.current = 28; setWin(around()); setMid(range.start); } }, [range.start, sliding]);
+  useLayoutEffect(() => {
+    if (sliding) {
+      jump.current = INIT_PAST_DAYS;
+      expanding.current = false;
+      shift.current = 0;
+      setWin(around(range.start));
+      setMid(range.start);
+    }
+  }, [range.start, sliding]);
+
   useLayoutEffect(() => {
     const el = scroller.current; if (!el || !sliding) return;
-    if (jump.current != null) { el.scrollLeft = jump.current * col; jump.current = null; el.style.setProperty('--sx', el.scrollLeft + 'px'); }
-    else if (shift.current) { el.scrollLeft += shift.current; shift.current = 0; }
-  }, [win, has, col]);
+    if (jump.current != null) {
+      el.scrollLeft = jump.current * col;
+      jump.current = null;
+      el.style.setProperty('--sx', el.scrollLeft + 'px');
+    } else if (shift.current) {
+      el.scrollLeft += shift.current;
+      shift.current = 0;
+      el.style.setProperty('--sx', el.scrollLeft + 'px');
+    }
+    expanding.current = false;
+  }, [win, hasProjects, col]);
+
   // Phones scroll the year: start with this month in view.
-  useLayoutEffect(() => { const el = scroller.current; if (el && !sliding && col) el.scrollLeft = range.start.slice(0, 4) === t.slice(0, 4) ? Math.max(0, (+t.slice(5, 7) - 2) * col) : 0; }, [range.start, sliding, col, has]);
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    if (el && !sliding && col) el.scrollLeft = range.start.slice(0, 4) === t.slice(0, 4) ? Math.max(0, (+t.slice(5, 7) - 2) * col) : 0;
+  }, [range.start, sliding, col, hasProjects]);
+
   useEffect(() => {
     const el = ticks.current; if (!el || col) return;
-    const ro = new ResizeObserver(([entry]) => setFitW(entry.contentRect.width)); ro.observe(el); return () => ro.disconnect();
-  }, [col, has]);
+    const ro = new ResizeObserver(([entry]) => setFitW(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [col, hasProjects]);
 
   const onScroll = () => {
     const el = scroller.current; if (!el) return;
     el.style.setProperty('--sx', el.scrollLeft + 'px');
+    lastScrollAt.current = performance.now();
     if (!sliding) return;
     const nameW = el.querySelector('.cv-wt-name')?.offsetWidth || 0, at = addDaysKey(win.start, Math.max(0, Math.floor((el.scrollLeft + (el.clientWidth - nameW) / 2) / col)));
     if (at.slice(0, 7) !== mid.slice(0, 7)) setMid(at);
-    if (shift.current || jump.current != null) return;
-    if (el.scrollLeft < EDGE_PX) { shift.current = SLIDE_DAYS * col; setWin(w => ({ ...w, start: addDaysKey(w.start, -SLIDE_DAYS) })); }
-    else if (el.scrollLeft + el.clientWidth > el.scrollWidth - EDGE_PX) setWin(w => ({ ...w, end: addDaysKey(w.end, SLIDE_DAYS) }));
+
+    if (expanding.current || shift.current || jump.current != null) return;
+
+    if (el.scrollLeft < EDGE_PX) {
+      const pastDays = (Date.parse(range.start) - Date.parse(win.start)) / 864e5;
+      if (pastDays >= MAX_PAST_DAYS) return;
+      expanding.current = true;
+      shift.current = SLIDE_DAYS * col;
+      setWin(w => ({ ...w, start: addDaysKey(w.start, -SLIDE_DAYS) }));
+    } else if (el.scrollLeft + el.clientWidth > el.scrollWidth - EDGE_PX) {
+      const futureDays = (Date.parse(win.end) - Date.parse(range.end)) / 864e5;
+      if (futureDays >= MAX_FUTURE_DAYS) return;
+      expanding.current = true;
+      setWin(w => ({ ...w, end: addDaysKey(w.end, SLIDE_DAYS) }));
+    }
   };
+
   // Mouse: grab anywhere on the strip and drag it sideways. Touch and trackpads scroll natively.
   const release = () => { grab.current = null; scroller.current?.classList.remove('is-grabbing'); };
   const pointer = col ? {
-    onPointerDown: e => { if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('.cv-wt-name')) return; grab.current = { x: e.clientX, left: scroller.current.scrollLeft, moved: false, id: e.pointerId }; },
+    onPointerDown: e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('.cv-wt-name')) return;
+      grab.current = { lastX: e.clientX, moved: false, id: e.pointerId };
+    },
     onPointerMove: e => {
       const g = grab.current; if (!g) return;
-      const dx = e.clientX - g.x;
-      if (!g.moved && Math.abs(dx) > 4) { g.moved = true; scroller.current.classList.add('is-grabbing'); try { scroller.current.setPointerCapture(g.id); } catch { /* already released */ } }
-      if (g.moved) scroller.current.scrollLeft = g.left - dx;
+      const dx = e.clientX - g.lastX;
+      if (!g.moved && Math.abs(dx) > 3) {
+        g.moved = true;
+        scroller.current?.classList.add('is-grabbing');
+        try { scroller.current?.setPointerCapture(g.id); } catch { /* already released */ }
+      }
+      if (g.moved && scroller.current) {
+        scroller.current.scrollLeft -= dx;
+        g.lastX = e.clientX;
+      }
     },
     onPointerUp: () => { if (grab.current?.moved) grabbedAt.current = performance.now(); release(); },
     onPointerCancel: release,
     onClickCapture: e => { if (performance.now() - grabbedAt.current < 250) { e.preventDefault(); e.stopPropagation(); } },
   } : {};
+
   const nudge = days => scroller.current?.scrollBy({ left: days * col, behavior: 'smooth' });
-  const goTo = k => { const el = scroller.current; if (el) el.scrollTo({ left: Math.max(0, (Math.round((Date.parse(k) - Date.parse(win.start)) / 864e5) - 2) * col), behavior: 'smooth' }); };
+  const goTo = k => {
+    const el = scroller.current; if (!el) return;
+    if (k < win.start || k >= win.end) {
+      jump.current = INIT_PAST_DAYS;
+      expanding.current = false;
+      shift.current = 0;
+      setWin(around(k));
+      setMid(k);
+      return;
+    }
+    const idx = Math.round((Date.parse(k) - Date.parse(win.start)) / 864e5);
+    el.scrollTo({ left: Math.max(0, (idx - 2) * col), behavior: 'smooth' });
+  };
 
   const dates = p => `${p.start ? fmt(p.start, { day: 'numeric', month: 'short' }) : '?'} to ${p.end ? fmt(p.end, { day: 'numeric', month: 'short' }) : 'ongoing'}`;
   const progress = p => { const all = d.tasks.filter(x => x.project === p.id && !x.arch); return all.length ? `${all.filter(x => x.status === 'Done').length}/${all.length} tasks` : ''; };
@@ -409,13 +477,14 @@ function Timeline({ d, zoom, day, toneOf, completed, client, compact, onOpen, on
   const rowStyle = { gridTemplateColumns: col ? `var(--wt-name) ${trackW}px` : 'var(--wt-name) minmax(0, 1fr)' };
   return <details className="cv-timeline" open={!compact}>
     <summary><span><b>What you’re working on</b><small>{count} project{count === 1 ? '' : 's'} this {period}{undated ? ` · ${undated} active without dates` : ''}</small></span><Icon name="chevronDown" size={18} /></summary>
-    {has && sliding && <div className="cv-wt-nav"><b aria-live="polite">{fmt(mid, { month: 'long', year: 'numeric' })}</b>
+    {hasProjects && sliding && <div className="cv-wt-nav"><b aria-live="polite">{fmt(mid, { month: 'long', year: 'numeric' })}</b>
       <button type="button" className="cv-icon" aria-label="Earlier dates" onClick={() => nudge(-7)}><Icon name="left" size={18} /></button>
       <button type="button" className="cv-pill" onClick={() => goTo(t)}>Today</button>
       <button type="button" className="cv-icon" aria-label="Later dates" onClick={() => nudge(7)}><Icon name="arrow" size={18} /></button></div>}
-    {has ? <div ref={scroller} className={'cv-hscroll' + (col ? ' is-scroll' : '')} onScroll={onScroll} {...pointer} tabIndex={col ? 0 : undefined} aria-label={col ? 'Project timeline. Scroll sideways for more dates.' : undefined}>
+    {hasProjects ? <div ref={scroller} className={'cv-hscroll' + (col ? ' is-scroll' : '')} onScroll={onScroll} {...pointer} tabIndex={col ? 0 : undefined} aria-label={col ? 'Project timeline. Scroll sideways for more dates.' : undefined}>
       <div className="cv-wt">
-        <div className="cv-wt-row cv-wt-ticks" style={rowStyle}><span className="cv-wt-name" /><div ref={ticks} className="cv-wt-cols" style={colsStyle}>{cols.map(c => <button key={c.key} type="button" tabIndex={-1} className={(c.today ? 'is-today ' : '') + (c.shade ? 'shade' : '')} onClick={() => onPickDay(c.key)} aria-label={'Open ' + fmt(c.key, { dateStyle: 'full' })}>
+        <div className="cv-wt-row cv-wt-ticks" style={rowStyle}><span className="cv-wt-name" /><div ref={ticks} className="cv-wt-cols" style={colsStyle}>{cols.map(c => <button key={c.key} type="button" tabIndex={-1} className={(c.today ? 'is-today ' : '') + (c.shade ? 'shade' : '')}
+          onClick={() => { if (performance.now() - lastScrollAt.current > 150 && performance.now() - grabbedAt.current > 250) onPickDay(c.key); }} aria-label={'Open ' + fmt(c.key, { dateStyle: 'full' })}>
           {sliding && <em>{c.month}</em>}{c.top && <small>{c.top}</small>}<b>{c.label}</b></button>)}</div></div>
         {rows.map(({ c, bars, lanes }) => <div className="cv-wt-row" key={c.id || 'none'} style={rowStyle}>
           <a className="cv-wt-name" href={c.id ? '#/clients/' + c.id : '#/projects'}><i style={{ background: toneOf(c.id) || 'var(--mu)' }} /><span>{c.name}</span></a>
